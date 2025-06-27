@@ -3,8 +3,8 @@
 import styles from '../styles/Page.module.css';
 
 const TOKEN_TYPES = [
-  { id: 'token-2022', name: 'Token-2022' },
-  { id: 'legacy-spl', name: 'Legacy SPL' },
+  { id: 'spl-20', name: 'SPL-20' },
+  { id: 'spl-22', name: 'SPL-22' },
 ];
 
 type TokenSelectorProps = {

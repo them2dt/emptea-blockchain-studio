@@ -4,6 +4,11 @@ import {
   createAssociatedTokenAccountInstruction,
   getAssociatedTokenAddress,
   createMintToInstruction,
+  TOKEN_2022_PROGRAM_ID,
+  createInitializeMintInstruction,
+  getMintLen,
+  ExtensionType,
+  createInitializeMetadataPointerInstruction,
 } from "@solana/spl-token";
 import {
   Connection,
@@ -12,21 +17,12 @@ import {
   SendTransactionError,
   SystemProgram,
   Transaction,
+  LAMPORTS_PER_SOL,
 } from "@solana/web3.js";
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import toast from "react-hot-toast";
 import styles from "../styles/Page.module.css";
 import {
-  createInitializeMintInstruction,
-  getMintLen,
-  ExtensionType,
-  TOKEN_2022_PROGRAM_ID,
-  createInitializeMetadataPointerInstruction,
-  getMetadataPointerState,
-  getTokenMetadata,
-} from "@solana/spl-token";
-import {
-  createInitializeInstruction,
   createUpdateFieldInstruction,
   pack,
 } from "@solana/spl-token-metadata";
@@ -40,6 +36,7 @@ type MinterProps = {
   tokenUri: string;
   tokenDecimals: number;
   tokenAmount: number;
+  onStateChange: (status: string, signature?: string) => void;
 };
 
 /**
@@ -56,23 +53,18 @@ export function Token2022Minter({
   tokenUri,
   tokenAmount,
   tokenDecimals,
+  onStateChange,
 }: MinterProps) {
-  const [status, setStatus] = useState("idle"); // 'idle', 'creating', 'waiting', 'confirming', 'success', 'error'
-  const [signature, setSignature] = useState("");
-
-  /**
-   * Handles the creation of the token.
-   */
   const handleCreateToken = useCallback(async () => {
     if (!publicKey) {
       toast.error("Please connect your wallet.");
       return;
     }
 
-    setStatus("creating");
-    setSignature("");
+    onStateChange("creating");
 
     try {
+      console.log("Creating token...");
       const mint = Keypair.generate();
       
       const extensions = [ExtensionType.MetadataPointer];
@@ -93,7 +85,7 @@ export function Token2022Minter({
         SystemProgram.createAccount({
           fromPubkey: publicKey,
           newAccountPubkey: mint.publicKey,
-          space: mintLen,
+          space: mintLen + metadataLen,
           lamports,
           programId: TOKEN_2022_PROGRAM_ID,
         }),
@@ -110,19 +102,29 @@ export function Token2022Minter({
           null, // freeze authority
           TOKEN_2022_PROGRAM_ID
         ),
-        createInitializeInstruction({
+        createUpdateFieldInstruction({
           programId: TOKEN_2022_PROGRAM_ID,
           metadata: mint.publicKey,
           updateAuthority: publicKey,
-          mint: mint.publicKey,
-          mintAuthority: publicKey,
-          name: tokenName,
-          symbol: tokenSymbol,
-          uri: tokenUri,
+          field: "name",
+          value: tokenName,
         }),
+        createUpdateFieldInstruction({
+          programId: TOKEN_2022_PROGRAM_ID,
+          metadata: mint.publicKey,
+          updateAuthority: publicKey,
+          field: "symbol",
+          value: tokenSymbol,
+        }),
+        createUpdateFieldInstruction({
+          programId: TOKEN_2022_PROGRAM_ID,
+          metadata: mint.publicKey,
+          updateAuthority: publicKey,
+          field: "uri",
+          value: tokenUri,
+        })
       );
 
-      // Add mint to instruction for associated token account
       const associatedTokenAddress = await getAssociatedTokenAddress(
         mint.publicKey,
         publicKey,
@@ -148,7 +150,22 @@ export function Token2022Minter({
         )
       );
       
-      setStatus("waiting");
+      try {
+        const { blockhash } = await connection.getLatestBlockhash();
+        const feeTx = new Transaction({
+          feePayer: publicKey,
+          recentBlockhash: blockhash,
+        }).add(...transaction.instructions);
+        
+        const fee = (await connection.getFeeForMessage(feeTx.compileMessage(), 'confirmed')).value;
+        if (fee) {
+          console.log(`Estimated transaction fee: ${fee / LAMPORTS_PER_SOL} SOL`);
+        }
+      } catch (e) {
+        console.error("Could not estimate transaction fee:", e);
+      }
+
+      onStateChange("waiting");
       toast("Waiting for wallet approval...", { icon: '⏳' });
 
       const {
@@ -161,8 +178,7 @@ export function Token2022Minter({
         signers: [mint],
       });
 
-      setSignature(signature);
-      setStatus("confirming");
+      onStateChange("confirming", signature);
       toast.success('Transaction sent! Confirming...', { id: signature });
 
       await connection.confirmTransaction({
@@ -172,7 +188,7 @@ export function Token2022Minter({
       });
 
       toast.success("Token created successfully!", { id: signature });
-      setStatus("success");
+      onStateChange("success", signature);
     } catch (error) {
       if (error instanceof SendTransactionError) {
         toast.error(`Transaction failed: ${error.message}`);
@@ -180,51 +196,16 @@ export function Token2022Minter({
         toast.error("An unknown error occurred.");
       }
       console.error(error);
-      setStatus("error");
+      onStateChange("error");
     }
-  }, [publicKey, connection, sendTransaction, tokenAmount, tokenDecimals, tokenName, tokenSymbol, tokenUri]);
+  }, [publicKey, connection, sendTransaction, tokenAmount, tokenDecimals, tokenName, tokenSymbol, tokenUri, onStateChange]);
   
-  const getButtonText = () => {
-    switch (status) {
-        case "creating": return "Preparing...";
-        case "waiting": return "Waiting for Approval...";
-        case "confirming": return "Confirming...";
-        case "success": return "Create Another Token";
-        default: return "Create Token";
-    }
-  };
-
   return (
-    <>
-      <button
-        className={styles.submitButton}
-        onClick={handleCreateToken}
-        disabled={status === "creating" || status === "waiting" || status === "confirming"}
-      >
-        {getButtonText()}
-      </button>
-      
-      {signature && (
-        <div className={styles.statusContainer}>
-            <p>
-                {status === "success" ? "Token created successfully!" : "Transaction sent! Waiting for confirmation..."}
-            </p>
-            <a
-                href={`https://solscan.io/tx/${signature}?cluster=devnet`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={styles.explorerLink}
-            >
-                View on Solscan
-            </a>
-        </div>
-      )}
-
-      {status === 'error' && (
-        <div className={styles.statusContainer}>
-            <p>Something went wrong. Please check the console and try again.</p>
-        </div>
-      )}
-    </>
+    <button
+      className={styles.submitButton}
+      onClick={handleCreateToken}
+    >
+      Create Token
+    </button>
   );
 } 

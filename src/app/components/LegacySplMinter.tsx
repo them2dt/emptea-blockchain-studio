@@ -16,8 +16,9 @@ import {
   SendTransactionError,
   SystemProgram,
   Transaction,
+  LAMPORTS_PER_SOL,
 } from "@solana/web3.js";
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import toast from "react-hot-toast";
 import styles from "../styles/Page.module.css";
 
@@ -27,6 +28,7 @@ type MinterProps = {
   sendTransaction: any;
   tokenDecimals: number;
   tokenAmount: number;
+  onStateChange: (status: string, signature?: string) => void;
 };
 
 export function LegacySplMinter({
@@ -35,32 +37,25 @@ export function LegacySplMinter({
   sendTransaction,
   tokenAmount,
   tokenDecimals,
+  onStateChange,
 }: MinterProps) {
-  const [status, setStatus] = useState("idle");
-  const [signature, setSignature] = useState("");
-
   const handleCreateToken = useCallback(async () => {
     if (!publicKey) {
       toast.error("Please connect your wallet.");
       return;
     }
 
-    setStatus("creating");
-    setSignature("");
+    onStateChange("creating");
 
     try {
       const mint = Keypair.generate();
-      const lamports = await getMinimumBalanceForRentExemptMint(connection);
-      const associatedTokenAddress = await getAssociatedTokenAddress(
-        mint.publicKey,
-        publicKey
-      );
+      const lamports = await connection.getMinimumBalanceForRentExemption(82);
 
       const transaction = new Transaction().add(
         SystemProgram.createAccount({
           fromPubkey: publicKey,
           newAccountPubkey: mint.publicKey,
-          space: MINT_SIZE,
+          space: 82,
           lamports,
           programId: TOKEN_PROGRAM_ID,
         }),
@@ -68,9 +63,17 @@ export function LegacySplMinter({
           mint.publicKey,
           tokenDecimals,
           publicKey,
-          publicKey,
+          null,
           TOKEN_PROGRAM_ID
-        ),
+        )
+      );
+
+      const associatedTokenAddress = await getAssociatedTokenAddress(
+        mint.publicKey,
+        publicKey
+      );
+
+      transaction.add(
         createAssociatedTokenAccountInstruction(
           publicKey,
           associatedTokenAddress,
@@ -84,8 +87,23 @@ export function LegacySplMinter({
           tokenAmount * 10 ** tokenDecimals
         )
       );
+      
+      try {
+        const { blockhash } = await connection.getLatestBlockhash();
+        const feeTx = new Transaction({
+          feePayer: publicKey,
+          recentBlockhash: blockhash,
+        }).add(...transaction.instructions);
+        
+        const fee = (await connection.getFeeForMessage(feeTx.compileMessage(), 'confirmed')).value;
+        if (fee) {
+          console.log(`Estimated transaction fee: ${fee / LAMPORTS_PER_SOL} SOL`);
+        }
+      } catch (e) {
+        console.error("Could not estimate transaction fee:", e);
+      }
 
-      setStatus("waiting");
+      onStateChange("waiting");
       toast("Waiting for wallet approval...", { icon: '⏳' });
 
       const {
@@ -98,8 +116,7 @@ export function LegacySplMinter({
         signers: [mint],
       });
 
-      setSignature(signature);
-      setStatus("confirming");
+      onStateChange("confirming", signature);
       toast.success('Transaction sent! Confirming...', { id: signature });
 
       await connection.confirmTransaction({
@@ -109,7 +126,7 @@ export function LegacySplMinter({
       });
 
       toast.success("Token created successfully!", { id: signature });
-      setStatus("success");
+      onStateChange("success", signature);
     } catch (error) {
       if (error instanceof SendTransactionError) {
         toast.error(`Transaction failed: ${error.message}`);
@@ -117,51 +134,16 @@ export function LegacySplMinter({
         toast.error("An unknown error occurred.");
       }
       console.error(error);
-      setStatus("error");
+      onStateChange("error");
     }
-  }, [publicKey, connection, sendTransaction, tokenAmount, tokenDecimals]);
-
-  const getButtonText = () => {
-    switch (status) {
-        case "creating": return "Preparing...";
-        case "waiting": return "Waiting for Approval...";
-        case "confirming": return "Confirming...";
-        case "success": return "Create Another Token";
-        default: return "Create Token";
-    }
-  };
+  }, [publicKey, connection, sendTransaction, tokenAmount, tokenDecimals, onStateChange]);
 
   return (
-    <>
-      <button
-        className={styles.submitButton}
-        onClick={handleCreateToken}
-        disabled={status === "creating" || status === "waiting" || status === "confirming"}
-      >
-        {getButtonText()}
-      </button>
-      
-      {signature && (
-        <div className={styles.statusContainer}>
-            <p>
-                {status === "success" ? "Token created successfully!" : "Transaction sent! Waiting for confirmation..."}
-            </p>
-            <a
-                href={`https://solscan.io/tx/${signature}?cluster=devnet`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={styles.explorerLink}
-            >
-                View on Solscan
-            </a>
-        </div>
-      )}
-
-      {status === 'error' && (
-        <div className={styles.statusContainer}>
-            <p>Something went wrong. Please check the console and try again.</p>
-        </div>
-      )}
-    </>
+    <button
+      className={styles.submitButton}
+      onClick={handleCreateToken}
+    >
+      Create Token
+    </button>
   );
 } 

@@ -2,13 +2,14 @@
 
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Toaster } from "react-hot-toast";
 import styles from "./styles/Page.module.css";
 import { LoadingScreen } from "./components/LoadingScreen";
 import { TokenSelector } from "./components/TokenSelector";
 import { Token2022Minter } from "./components/Token2022Minter";
 import { LegacySplMinter } from "./components/LegacySplMinter";
+import { StatusModal } from "./components/StatusModal";
 
 export default function Home() {
   const { connection } = useConnection();
@@ -19,7 +20,21 @@ export default function Home() {
   const [tokenDecimals, setTokenDecimals] = useState('9');
   const [tokenAmount, setTokenAmount] = useState('1000');
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedTokenType, setSelectedTokenType] = useState("token-2022");
+  const [selectedTokenType, setSelectedTokenType] = useState("spl-20");
+
+  // State for the transaction modal
+  const [txState, setTxState] = useState({
+    status: 'idle', // 'idle', 'creating', 'waiting', 'confirming', 'success', 'error'
+    signature: ''
+  });
+
+  const handleStateChange = useCallback((status: string, signature?: string) => {
+    setTxState({ status, signature: signature || txState.signature });
+  }, [txState.signature]);
+
+  const closeModal = () => {
+    setTxState({ status: 'idle', signature: ''});
+  }
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -32,6 +47,15 @@ export default function Home() {
   if (isLoading) {
     return <LoadingScreen />;
   }
+
+  const sharedMinterProps = {
+    connection,
+    publicKey,
+    sendTransaction,
+    tokenAmount: Number(tokenAmount),
+    tokenDecimals: Number(tokenDecimals),
+    onStateChange: handleStateChange,
+  };
 
   return (
     <>
@@ -54,6 +78,12 @@ export default function Home() {
           onSelectType={setSelectedTokenType}
         />
 
+        <StatusModal 
+          status={txState.status}
+          signature={txState.signature}
+          onClose={closeModal}
+        />
+
         <div className={styles.card}>
           <div className={styles.contactForm}>
             <input
@@ -70,7 +100,7 @@ export default function Home() {
               value={tokenSymbol}
               onChange={(e) => setTokenSymbol(e.target.value)}
             />
-            {selectedTokenType === "token-2022" && (
+            {selectedTokenType === "spl-22" && (
               <input
                 type="text"
                 placeholder="Token Metadata URI (e.g., https://...)"
@@ -94,26 +124,18 @@ export default function Home() {
               onChange={(e) => setTokenAmount(e.target.value)}
             />
 
-            {selectedTokenType === "token-2022" ? (
-              <Token2022Minter
-                connection={connection}
-                publicKey={publicKey}
-                sendTransaction={sendTransaction}
-                tokenAmount={parseInt(tokenAmount) || 0}
-                tokenDecimals={parseInt(tokenDecimals) || 0}
-                tokenName={tokenName}
-                tokenSymbol={tokenSymbol}
-                tokenUri={tokenUri}
-              />
-            ) : (
-              <LegacySplMinter
-                connection={connection}
-                publicKey={publicKey}
-                sendTransaction={sendTransaction}
-                tokenAmount={parseInt(tokenAmount) || 0}
-                tokenDecimals={parseInt(tokenDecimals) || 0}
-              />
-            )}
+            <div className={styles.buttonContainer}>
+              {selectedTokenType === "spl-22" ? (
+                <Token2022Minter
+                  {...sharedMinterProps}
+                  tokenName={tokenName}
+                  tokenSymbol={tokenSymbol}
+                  tokenUri={tokenUri}
+                />
+              ) : (
+                <LegacySplMinter {...sharedMinterProps} />
+              )}
+            </div>
           </div>
         </div>
         
