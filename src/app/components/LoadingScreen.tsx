@@ -4,7 +4,7 @@ export function LoadingScreen() {
   return (
     <div className={styles.loadingScreen}>
       <div className={styles.loadingText}>
-        EMPTEA STUDIOS®
+        Emptea Blockchain Studio
       </div>
     </div>
   );

@@ -3,25 +3,28 @@
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { useEffect, useState } from "react";
-import { Minter } from "./components/minter";
 import { Toaster } from "react-hot-toast";
 import styles from "./styles/Page.module.css";
-import Image from "next/image";
 import { LoadingScreen } from "./components/LoadingScreen";
+import { TokenSelector } from "./components/TokenSelector";
+import { Token2022Minter } from "./components/Token2022Minter";
+import { LegacySplMinter } from "./components/LegacySplMinter";
 
 export default function Home() {
   const { connection } = useConnection();
   const { publicKey, sendTransaction } = useWallet();
   const [tokenName, setTokenName] = useState("");
   const [tokenSymbol, setTokenSymbol] = useState("");
+  const [tokenUri, setTokenUri] = useState("");
   const [tokenDecimals, setTokenDecimals] = useState('9');
   const [tokenAmount, setTokenAmount] = useState('1000');
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedTokenType, setSelectedTokenType] = useState("token-2022");
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 3000); // Show loading screen for 3 seconds
+    }, 3000);
 
     return () => clearTimeout(timer);
   }, []);
@@ -31,76 +34,97 @@ export default function Home() {
   }
 
   return (
-    <div>
-      <header className={styles.header}>
-        <nav className={styles.navbar} style={{ justifyContent: 'flex-end' }}>
-          <div className={styles.contactButton}>
-            <WalletMultiButton />
-          </div>
-        </nav>
-      </header>
+    <>
+      <div className={styles.walletButtonContainer}>
+        <WalletMultiButton />
+      </div>
 
-      <main>
-        <section className={styles.hero}>
+      <main className={styles.main}>
+        <div className={styles.hero}>
           <h1 className={styles.heroTitle}>
-            <span className={styles.highlight}>SPL Token</span> Creator
+            <span>Solana</span> Token Creator
           </h1>
-        </section>
-        
-        <section className={styles.contact}>
-          <div className={styles.contactHeader}>
-            <h2>Create a New Token</h2>
-          </div>
+          <p className={styles.heroSubtitle}>
+            Easily create and launch your own SPL token on the Solana network.
+          </p>
+        </div>
+
+        <TokenSelector
+          selectedType={selectedTokenType}
+          onSelectType={setSelectedTokenType}
+        />
+
+        <div className={styles.card}>
           <div className={styles.contactForm}>
             <input
               type="text"
-              placeholder="Token Name"
+              placeholder="Token Name (e.g., Emptea Coin)"
               className={styles.inputField}
               value={tokenName}
               onChange={(e) => setTokenName(e.target.value)}
             />
             <input
               type="text"
-              placeholder="Token Symbol"
+              placeholder="Token Symbol (e.g., MPT)"
               className={styles.inputField}
               value={tokenSymbol}
               onChange={(e) => setTokenSymbol(e.target.value)}
             />
+            {selectedTokenType === "token-2022" && (
+              <input
+                type="text"
+                placeholder="Token Metadata URI (e.g., https://...)"
+                className={styles.inputField}
+                value={tokenUri}
+                onChange={(e) => setTokenUri(e.target.value)}
+              />
+            )}
             <input
               type="number"
-              placeholder="Token Decimals"
+              placeholder="Decimals"
               className={styles.inputField}
               value={tokenDecimals}
               onChange={(e) => setTokenDecimals(e.target.value)}
             />
             <input
               type="number"
-              placeholder="Token Amount"
+              placeholder="Amount to Mint"
               className={styles.inputField}
               value={tokenAmount}
               onChange={(e) => setTokenAmount(e.target.value)}
             />
 
-            <Minter
-              connection={connection}
-              publicKey={publicKey}
-              sendTransaction={sendTransaction}
-              tokenAmount={parseInt(tokenAmount) || 0}
-              tokenDecimals={parseInt(tokenDecimals) || 0}
-              tokenName={tokenName}
-              tokenSymbol={tokenSymbol}
-            />
+            {selectedTokenType === "token-2022" ? (
+              <Token2022Minter
+                connection={connection}
+                publicKey={publicKey}
+                sendTransaction={sendTransaction}
+                tokenAmount={parseInt(tokenAmount) || 0}
+                tokenDecimals={parseInt(tokenDecimals) || 0}
+                tokenName={tokenName}
+                tokenSymbol={tokenSymbol}
+                tokenUri={tokenUri}
+              />
+            ) : (
+              <LegacySplMinter
+                connection={connection}
+                publicKey={publicKey}
+                sendTransaction={sendTransaction}
+                tokenAmount={parseInt(tokenAmount) || 0}
+                tokenDecimals={parseInt(tokenDecimals) || 0}
+              />
+            )}
           </div>
-        </section>
+        </div>
+        
+        <footer className={styles.footer}>
+            <div className={styles.footerBottom}>
+                <p>Powered by Solana | © 2024 Emptea Blockchain Studio</p>
+            </div>
+        </footer>
       </main>
 
-      <footer className={styles.footer}>
-        <div className={styles.footerBottom} style={{ textAlign: 'center', width: '100%' }}>
-            <p>Powered by Solana | © 2024 Emptea Studios</p>
-        </div>
-    </footer>
-
       <Toaster />
-    </div>
+    </>
   );
 }

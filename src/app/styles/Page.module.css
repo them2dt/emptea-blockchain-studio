@@ -59,23 +59,42 @@
   background-color: #e5e5ea;
 }
 
-.hero {
+.walletButtonContainer {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+}
+
+.main {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  min-height: 33vh;
+  padding: 4rem 1rem;
+  min-height: 100vh;
+}
+
+.hero {
   text-align: center;
-  padding-top: 120px; /* Adjusted for new header height */
-  background-color: #fafafa;
-  border-bottom: 1px solid #eaeaea;
+  margin-bottom: 3rem;
 }
 
 .heroTitle {
   font-family: "satoshi-bold";
-  font-size: 4rem;
-  margin-bottom: 1rem;
-  color: black;
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+  color: var(--foreground-color);
+}
+
+.heroTitle span {
+  color: var(--primary-color);
+}
+
+.heroSubtitle {
+  font-family: 'satoshi-regular';
+  font-size: 1.125rem;
+  color: #6b7280;
+  max-width: 500px;
 }
 
 .highlight {
@@ -570,52 +589,59 @@
 .contactForm {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  max-width: 500px;
-  margin: 2rem auto 0;
+  gap: 1.25rem;
 }
 
-.inputField,
-.textareaField {
+.inputField {
   width: 100%;
-  padding: 1rem;
-  border-radius: 8px;
-  border: 1px solid #ddd;
+  padding: 0.75rem 1rem;
   font-family: 'satoshi-regular';
   font-size: 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background-color: #f9fafb;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.textareaField {
-  height: 150px;
-  resize: vertical;
+.inputField:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
 }
 
 .submitButton {
-  padding: 1rem;
-  border-radius: 8px;
-  border: none;
-  background-color: #0070f3;
+  background-color: var(--primary-color);
   color: white;
+  padding: 0.75rem;
+  border: none;
+  border-radius: 8px;
   font-family: 'satoshi-bold';
   font-size: 1rem;
   cursor: pointer;
+  transition: background-color 0.2s;
 }
 
-.submitButton:hover {
-  background-color: #0056b3;
+.submitButton:hover:not(:disabled) {
+  background-color: var(--primary-color-hover);
+}
+
+.submitButton:disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
 }
 
 .statusContainer {
   margin-top: 20px;
   padding: 15px;
-  background-color: #f0f0f0;
+  background-color: #f3f4f6;
   border-radius: 8px;
   text-align: center;
   font-family: 'satoshi-regular', sans-serif;
+  border: 1px solid var(--border-color);
 }
 
 .explorerLink {
-  color: #007bff;
+  color: var(--primary-color);
   text-decoration: none;
   font-weight: bold;
   margin-top: 10px;
@@ -627,9 +653,10 @@
 }
 
 .footer {
-  background-color: #fff;
-  padding: 4rem 2rem 2rem;
-  border-top: 1px solid #ddd;
+  width: 100%;
+  margin-top: 4rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--border-color);
 }
 
 .footerGrid {
@@ -672,11 +699,8 @@
 }
 
 .footerBottom {
-  text-align: right;
-  font-family: 'satoshi-regular';
-  font-size: 0.9rem;
-  color: #666;
-  margin-top: 2rem;
+  text-align: center;
+  color: #6b7280;
 }
 
 .loaderContainer {
@@ -1089,4 +1113,41 @@
 .faqSection {
   padding: 4rem 2rem;
   max-width: 800px;
+}
+
+.card {
+  background-color: var(--card-background-color);
+  border-radius: 16px;
+  padding: 2rem;
+  width: 100%;
+  max-width: 500px;
+  border: 1px solid var(--border-color);
+}
+
+.carouselContainer {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.carouselItem {
+  padding: 0.75rem 1.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: 9999px; /* pill shape */
+  font-family: 'satoshi-medium';
+  cursor: pointer;
+  background-color: var(--card-background-color);
+  transition: all 0.2s ease-in-out;
+}
+
+.carouselItem:hover:not(.selected) {
+  border-color: var(--primary-color);
+  transform: translateY(-2px);
+}
+
+.carouselItem.selected {
+  background-color: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
 } 

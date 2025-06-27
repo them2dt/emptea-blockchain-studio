@@ -25,30 +25,20 @@ type MinterProps = {
   connection: Connection;
   publicKey: PublicKey | null;
   sendTransaction: any;
-  tokenName: string;
-  tokenSymbol: string;
   tokenDecimals: number;
   tokenAmount: number;
 };
 
-/**
- * Minter component to create and mint SPL tokens.
- * @param {MinterProps} props The properties for the Minter component.
- * @returns {JSX.Element} The Minter component.
- */
-export function Minter({
+export function LegacySplMinter({
   connection,
   publicKey,
   sendTransaction,
   tokenAmount,
   tokenDecimals,
 }: MinterProps) {
-  const [status, setStatus] = useState("idle"); // 'idle', 'creating', 'waiting', 'confirming', 'success', 'error'
+  const [status, setStatus] = useState("idle");
   const [signature, setSignature] = useState("");
 
-  /**
-   * Handles the creation of the token.
-   */
   const handleCreateToken = useCallback(async () => {
     if (!publicKey) {
       toast.error("Please connect your wallet.");
@@ -94,7 +84,7 @@ export function Minter({
           tokenAmount * 10 ** tokenDecimals
         )
       );
-      
+
       setStatus("waiting");
       toast("Waiting for wallet approval...", { icon: '⏳' });
 
@@ -102,7 +92,7 @@ export function Minter({
         context: { slot: minContextSlot },
         value: { blockhash, lastValidBlockHeight },
       } = await connection.getLatestBlockhashAndContext();
-
+      
       const signature = await sendTransaction(transaction, connection, {
         minContextSlot,
         signers: [mint],
@@ -130,7 +120,7 @@ export function Minter({
       setStatus("error");
     }
   }, [publicKey, connection, sendTransaction, tokenAmount, tokenDecimals]);
-  
+
   const getButtonText = () => {
     switch (status) {
         case "creating": return "Preparing...";

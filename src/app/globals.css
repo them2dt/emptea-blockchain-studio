@@ -4,6 +4,15 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --background-color: #f9fafb;
+  --foreground-color: #111827;
+  --card-background-color: #ffffff;
+  --border-color: #e5e7eb;
+  --primary-color: #3b82f6;
+  --primary-color-hover: #2563eb;
+}
+
 @font-face {
   font-family: "satoshi-light";
   src: url("./styles/fonts/Satoshi-Light.otf") format("opentype");
@@ -47,8 +56,8 @@
 }
 
 body {
-  color: #000;
-  background-color: #fff;
+  color: var(--foreground-color);
+  background-color: var(--background-color);
   font-family: "satoshi-regular", sans-serif;
 }
 
