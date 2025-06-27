@@ -1,103 +1,106 @@
+"use client";
+
+import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import { useConnection, useWallet } from "@solana/wallet-adapter-react";
+import { useEffect, useState } from "react";
+import { Minter } from "./components/minter";
+import { Toaster } from "react-hot-toast";
+import styles from "./styles/Page.module.css";
 import Image from "next/image";
+import { LoadingScreen } from "./components/LoadingScreen";
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const { connection } = useConnection();
+  const { publicKey, sendTransaction } = useWallet();
+  const [tokenName, setTokenName] = useState("");
+  const [tokenSymbol, setTokenSymbol] = useState("");
+  const [tokenDecimals, setTokenDecimals] = useState('9');
+  const [tokenAmount, setTokenAmount] = useState('1000');
+  const [isLoading, setIsLoading] = useState(true);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 3000); // Show loading screen for 3 seconds
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
+
+  return (
+    <div>
+      <header className={styles.header}>
+        <nav className={styles.navbar} style={{ justifyContent: 'flex-end' }}>
+          <div className={styles.contactButton}>
+            <WalletMultiButton />
+          </div>
+        </nav>
+      </header>
+
+      <main>
+        <section className={styles.hero}>
+          <h1 className={styles.heroTitle}>
+            <span className={styles.highlight}>SPL Token</span> Creator
+          </h1>
+        </section>
+        
+        <section className={styles.contact}>
+          <div className={styles.contactHeader}>
+            <h2>Create a New Token</h2>
+          </div>
+          <div className={styles.contactForm}>
+            <input
+              type="text"
+              placeholder="Token Name"
+              className={styles.inputField}
+              value={tokenName}
+              onChange={(e) => setTokenName(e.target.value)}
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
+            <input
+              type="text"
+              placeholder="Token Symbol"
+              className={styles.inputField}
+              value={tokenSymbol}
+              onChange={(e) => setTokenSymbol(e.target.value)}
+            />
+            <input
+              type="number"
+              placeholder="Token Decimals"
+              className={styles.inputField}
+              value={tokenDecimals}
+              onChange={(e) => setTokenDecimals(e.target.value)}
+            />
+            <input
+              type="number"
+              placeholder="Token Amount"
+              className={styles.inputField}
+              value={tokenAmount}
+              onChange={(e) => setTokenAmount(e.target.value)}
+            />
+
+            <Minter
+              connection={connection}
+              publicKey={publicKey}
+              sendTransaction={sendTransaction}
+              tokenAmount={parseInt(tokenAmount) || 0}
+              tokenDecimals={parseInt(tokenDecimals) || 0}
+              tokenName={tokenName}
+              tokenSymbol={tokenSymbol}
+            />
+          </div>
+        </section>
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+      <footer className={styles.footer}>
+        <div className={styles.footerBottom} style={{ textAlign: 'center', width: '100%' }}>
+            <p>Powered by Solana | © 2024 Emptea Studios</p>
+        </div>
+    </footer>
+
+      <Toaster />
     </div>
   );
 }
