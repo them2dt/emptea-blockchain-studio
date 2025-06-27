@@ -5,7 +5,8 @@ import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { useEffect, useState, useCallback } from "react";
 import { Toaster } from "react-hot-toast";
 import styles from "./styles/Page.module.css";
-import { LoadingScreen } from "./components/LoadingScreen";
+import Loader from "./components/Loader";
+import { AnimatePresence } from "framer-motion";
 import { TokenSelector } from "./components/TokenSelector";
 import { Token2022Minter } from "./components/Token2022Minter";
 import { LegacySplMinter } from "./components/LegacySplMinter";
@@ -21,6 +22,7 @@ export default function Home() {
   const [tokenAmount, setTokenAmount] = useState('1000');
   const [isLoading, setIsLoading] = useState(true);
   const [selectedTokenType, setSelectedTokenType] = useState("spl-20");
+  const [isClient, setIsClient] = useState(false);
 
   // State for the transaction modal
   const [txState, setTxState] = useState({
@@ -37,16 +39,13 @@ export default function Home() {
   }
 
   useEffect(() => {
+    setIsClient(true);
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 3000);
+    }, 2000);
 
     return () => clearTimeout(timer);
   }, []);
-
-  if (isLoading) {
-    return <LoadingScreen />;
-  }
 
   const sharedMinterProps = {
     connection,
@@ -59,8 +58,12 @@ export default function Home() {
 
   return (
     <>
+      <AnimatePresence>
+        {isLoading && <Loader />}
+      </AnimatePresence>
+
       <div className={styles.walletButtonContainer}>
-        <WalletMultiButton />
+        {isClient && <WalletMultiButton />}
       </div>
 
       <main className={styles.main}>
@@ -141,7 +144,7 @@ export default function Home() {
         
         <footer className={styles.footer}>
             <div className={styles.footerBottom}>
-                <p>Powered by Solana | © 2024 Emptea Blockchain Studio</p>
+                <p>Emptea Blockchain Studio | © 2024 Emptea Studios</p>
             </div>
         </footer>
       </main>

@@ -59,42 +59,23 @@
   background-color: #e5e5ea;
 }
 
-.walletButtonContainer {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 1000;
-}
-
-.main {
+.hero {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 4rem 1rem;
-  min-height: 100vh;
-}
-
-.hero {
+  justify-content: center;
+  min-height: 50vh;
   text-align: center;
-  margin-bottom: 3rem;
+  padding-top: 120px; /* Adjusted for new header height */
+  background-color: #fafafa;
+  border-bottom: 1px solid #eaeaea;
 }
 
 .heroTitle {
   font-family: "satoshi-bold";
-  font-size: 2.5rem;
-  margin-bottom: 0.5rem;
-  color: var(--foreground-color);
-}
-
-.heroTitle span {
-  color: var(--primary-color);
-}
-
-.heroSubtitle {
-  font-family: 'satoshi-regular';
-  font-size: 1.125rem;
-  color: #6b7280;
-  max-width: 500px;
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  color: black;
 }
 
 .highlight {
@@ -589,81 +570,41 @@
 .contactForm {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1rem;
+  max-width: 500px;
+  margin: 2rem auto 0;
 }
 
-.inputField {
+.inputField,
+.textareaField {
   width: 100%;
-  padding: 0.75rem 1rem;
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid #ddd;
   font-family: 'satoshi-regular';
   font-size: 1rem;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  background-color: #f9fafb;
-  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.inputField:focus {
-  outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-}
-
-.buttonContainer {
-  display: flex;
-  margin-top: 2rem;
+.textareaField {
+  height: 150px;
+  resize: vertical;
 }
 
 .submitButton {
-  background-color: var(--primary-color);
-  color: white;
-  border: none;
-  padding: 1rem 2rem;
+  padding: 1rem;
   border-radius: 8px;
+  border: none;
+  background-color: #0070f3;
+  color: white;
   font-family: 'satoshi-bold';
   font-size: 1rem;
   cursor: pointer;
-  transition: background-color 0.2s, transform 0.2s;
-  width: 100%;
-}
-
-.submitButton:hover:not(:disabled) {
-  background-color: var(--primary-color-dark);
-  transform: translateY(-2px);
-}
-
-.submitButton:disabled {
-  background-color: #9ca3af;
-  cursor: not-allowed;
-}
-
-.statusContainer {
-  margin-top: 20px;
-  padding: 15px;
-  background-color: #f3f4f6;
-  border-radius: 8px;
-  text-align: center;
-  font-family: 'satoshi-regular', sans-serif;
-  border: 1px solid var(--border-color);
-}
-
-.explorerLink {
-  color: var(--primary-color);
-  text-decoration: none;
-  font-weight: bold;
-  margin-top: 10px;
-  display: inline-block;
-}
-
-.explorerLink:hover {
-  text-decoration: underline;
 }
 
 .footer {
-  width: 100%;
-  margin-top: 4rem;
-  padding-top: 2rem;
-  border-top: 1px solid var(--border-color);
+  background-color: #fff;
+  padding: 4rem 2rem 2rem;
+  border-top: 1px solid #ddd;
 }
 
 .footerGrid {
@@ -706,29 +647,32 @@
 }
 
 .footerBottom {
-  text-align: center;
-  color: #6b7280;
+  text-align: right;
+  font-family: 'satoshi-regular';
+  font-size: 0.9rem;
+  color: #666;
+  margin-top: 2rem;
 }
 
 .loaderContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: #0070f3;
-  z-index: 9999;
+  background: white;
+  z-index: 2000;
 }
 
 .loaderText {
-  font-family: 'satoshi-black';
-  font-size: 3rem; /* This is the default size for desktop */
-  color: white;
-  display: flex;
-  overflow: hidden;
+  font-family: 'satoshi-bold';
+  font-size: 3rem;
+  letter-spacing: 0.2rem;
+  color: var(--primary-color);
+  display: flex; /* Required for framer-motion stagger */
 }
 
 .desktopNav {
@@ -859,7 +803,7 @@
   }
 
   .loaderText {
-    font-size: 2rem; /* Add this for mobile screens */
+    font-size: 1.5rem;
   }
 
   .testimonialsSection {
@@ -889,37 +833,6 @@
 
   .heroTitle {
     font-size: 3rem;
-  }
-
-  .hero {
-    padding-top: 80px; /* Adjust for wallet button */
-  }
-
-  .container {
-    padding: 1rem;
-    margin-top: 0;
-  }
-
-  .card {
-    padding: 1.5rem;
-  }
-
-  .formGrid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-
-  .inputGroup {
-    grid-column: span 1;
-  }
-
-  .footer {
-    padding: 1rem;
-    text-align: center;
-  }
-
-  .footerBottom p {
-    font-size: 0.875rem;
   }
 }
 
@@ -1151,41 +1064,4 @@
 .faqSection {
   padding: 4rem 2rem;
   max-width: 800px;
-}
-
-.card {
-  background-color: var(--card-background-color);
-  border-radius: 16px;
-  padding: 2rem;
-  width: 100%;
-  max-width: 500px;
-  border: 1px solid var(--border-color);
-}
-
-.carouselContainer {
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-  margin-bottom: 2rem;
-}
-
-.carouselItem {
-  padding: 0.75rem 1.5rem;
-  border: 1px solid var(--border-color);
-  border-radius: 9999px; /* pill shape */
-  font-family: 'satoshi-medium';
-  cursor: pointer;
-  background-color: var(--card-background-color);
-  transition: all 0.2s ease-in-out;
-}
-
-.carouselItem:hover:not(.selected) {
-  border-color: var(--primary-color);
-  transform: translateY(-2px);
-}
-
-.carouselItem.selected {
-  background-color: var(--primary-color);
-  color: white;
-  border-color: var(--primary-color);
 } 
