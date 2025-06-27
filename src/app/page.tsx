@@ -11,6 +11,7 @@ import { TokenSelector } from "./components/TokenSelector";
 import { Token2022Minter } from "./components/Token2022Minter";
 import { LegacySplMinter } from "./components/LegacySplMinter";
 import { StatusModal } from "./components/StatusModal";
+import { NftMinter } from "./components/NftMinter";
 
 export default function Home() {
   const { connection } = useConnection();
@@ -21,7 +22,7 @@ export default function Home() {
   const [tokenDecimals, setTokenDecimals] = useState('9');
   const [tokenAmount, setTokenAmount] = useState('1000');
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedTokenType, setSelectedTokenType] = useState("spl-20");
+  const [selectedTokenType, setSelectedTokenType] = useState<"legacy" | "nft">("legacy");
   const [isClient, setIsClient] = useState(false);
 
   // State for the transaction modal
@@ -51,8 +52,6 @@ export default function Home() {
     connection,
     publicKey,
     sendTransaction,
-    tokenAmount: Number(tokenAmount),
-    tokenDecimals: Number(tokenDecimals),
     onStateChange: handleStateChange,
   };
 
@@ -103,40 +102,50 @@ export default function Home() {
               value={tokenSymbol}
               onChange={(e) => setTokenSymbol(e.target.value)}
             />
-            {selectedTokenType === "spl-22" && (
+            {selectedTokenType === "nft" && (
               <input
                 type="text"
-                placeholder="Token Metadata URI (e.g., https://...)"
+                placeholder="Metadata URI (e.g., https://...)"
                 className={styles.inputField}
                 value={tokenUri}
                 onChange={(e) => setTokenUri(e.target.value)}
+                required
               />
             )}
-            <input
-              type="number"
-              placeholder="Decimals"
-              className={styles.inputField}
-              value={tokenDecimals}
-              onChange={(e) => setTokenDecimals(e.target.value)}
-            />
-            <input
-              type="number"
-              placeholder="Amount to Mint"
-              className={styles.inputField}
-              value={tokenAmount}
-              onChange={(e) => setTokenAmount(e.target.value)}
-            />
+            
+            {selectedTokenType === "legacy" && (
+              <>
+                <input
+                  type="number"
+                  placeholder="Decimals"
+                  className={styles.inputField}
+                  value={tokenDecimals}
+                  onChange={(e) => setTokenDecimals(e.target.value)}
+                />
+                <input
+                  type="number"
+                  placeholder="Amount to Mint"
+                  className={styles.inputField}
+                  value={tokenAmount}
+                  onChange={(e) => setTokenAmount(e.target.value)}
+                />
+              </>
+            )}
 
             <div className={styles.buttonContainer}>
-              {selectedTokenType === "spl-22" ? (
-                <Token2022Minter
+              {selectedTokenType === "legacy" ? (
+                <LegacySplMinter
+                  {...sharedMinterProps}
+                  tokenAmount={Number(tokenAmount)}
+                  tokenDecimals={Number(tokenDecimals)}
+                />
+              ) : (
+                <NftMinter
                   {...sharedMinterProps}
                   tokenName={tokenName}
                   tokenSymbol={tokenSymbol}
                   tokenUri={tokenUri}
                 />
-              ) : (
-                <LegacySplMinter {...sharedMinterProps} />
               )}
             </div>
           </div>

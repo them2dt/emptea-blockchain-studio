@@ -1,7 +1,29 @@
+.selectorContainer {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
+  padding: 0.25rem;
+  background-color: #f3f4f6;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+}
+
+.selectorButton {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  background: transparent;
+  color: #6b7280;
+  font-family: 'satoshi-medium';
+  font-size: 1rem;
+  cursor: pointer;
+  border-radius: 9px;
+  transition: all 0.2s ease-in-out;
+}
+
 .selectorButton.active {
   color: var(--primary-color);
-  border-bottom: 2px solid var(--primary-color);
-  background-color: transparent;
+  background-color: white;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
 /* Responsive Styles */

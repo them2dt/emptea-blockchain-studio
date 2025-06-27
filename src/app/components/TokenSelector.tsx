@@ -1,25 +1,25 @@
 "use client";
 
-import styles from '../styles/Page.module.css';
-
-const TOKEN_TYPES = [
-  { id: 'spl-20', name: 'SPL-20' },
-  { id: 'spl-22', name: 'SPL-22' },
-];
+import styles from '../styles/TokenSelector.module.css';
 
 type TokenSelectorProps = {
   selectedType: string;
-  onSelectType: (type: string) => void;
+  onSelectType: (type: "legacy" | "nft") => void;
 };
+
+const TOKEN_TYPES = [
+  { id: 'legacy', name: 'Coin' },
+  { id: 'nft', name: 'NFT' },
+];
 
 export function TokenSelector({ selectedType, onSelectType }: TokenSelectorProps) {
   return (
-    <div className={styles.carouselContainer}>
+    <div className={styles.selectorContainer}>
       {TOKEN_TYPES.map((type) => (
         <button
           key={type.id}
-          className={`${styles.carouselItem} ${selectedType === type.id ? styles.selected : ''}`}
-          onClick={() => onSelectType(type.id)}
+          className={`${styles.selectorButton} ${selectedType === type.id ? styles.active : ''}`}
+          onClick={() => onSelectType(type.id as "legacy" | "nft")}
         >
           {type.name}
         </button>
