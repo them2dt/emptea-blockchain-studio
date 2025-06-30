@@ -589,12 +589,18 @@
 .contactForm {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1rem;
+}
+
+.legacyInputsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 .inputField {
   width: 100%;
-  padding: 0.75rem 1rem;
+  padding: 0.75rem;
   font-family: 'satoshi-regular';
   font-size: 1rem;
   border: 1px solid var(--border-color);
@@ -612,6 +618,10 @@
 .buttonContainer {
   display: flex;
   margin-top: 2rem;
+}
+
+.minterContainer {
+  width: 100%;
 }
 
 .submitButton {

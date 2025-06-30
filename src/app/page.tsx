@@ -6,9 +6,8 @@ import { useEffect, useState, useCallback } from "react";
 import { Toaster } from "react-hot-toast";
 import styles from "./styles/Page.module.css";
 import Loader from "./components/Loader";
-import { AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { TokenSelector } from "./components/TokenSelector";
-import { Token2022Minter } from "./components/Token2022Minter";
 import { LegacySplMinter } from "./components/LegacySplMinter";
 import { StatusModal } from "./components/StatusModal";
 import { NftMinter } from "./components/NftMinter";
@@ -102,51 +101,88 @@ export default function Home() {
               value={tokenSymbol}
               onChange={(e) => setTokenSymbol(e.target.value)}
             />
-            {selectedTokenType === "nft" && (
-              <input
-                type="text"
-                placeholder="Metadata URI (e.g., https://...)"
-                className={styles.inputField}
-                value={tokenUri}
-                onChange={(e) => setTokenUri(e.target.value)}
-                required
-              />
-            )}
-            
-            {selectedTokenType === "legacy" && (
-              <>
-                <input
-                  type="number"
-                  placeholder="Decimals"
-                  className={styles.inputField}
-                  value={tokenDecimals}
-                  onChange={(e) => setTokenDecimals(e.target.value)}
-                />
-                <input
-                  type="number"
-                  placeholder="Amount to Mint"
-                  className={styles.inputField}
-                  value={tokenAmount}
-                  onChange={(e) => setTokenAmount(e.target.value)}
-                />
-              </>
-            )}
+            <AnimatePresence mode="wait">
+              {selectedTokenType === "nft" && (
+                <motion.div
+                  key="nft-inputs"
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 20 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <input
+                    type="text"
+                    placeholder="Metadata URI (e.g., https://...)"
+                    className={styles.inputField}
+                    value={tokenUri}
+                    onChange={(e) => setTokenUri(e.target.value)}
+                    required
+                  />
+                </motion.div>
+              )}
+
+              {selectedTokenType === "legacy" && (
+                <motion.div
+                  key="legacy-inputs"
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 20 }}
+                  transition={{ duration: 0.3 }}
+                  className={styles.legacyInputsContainer}
+                >
+                  <input
+                    type="number"
+                    placeholder="Decimals"
+                    className={styles.inputField}
+                    value={tokenDecimals}
+                    onChange={(e) => setTokenDecimals(e.target.value)}
+                  />
+                  <input
+                    type="number"
+                    placeholder="Amount to Mint"
+                    className={styles.inputField}
+                    value={tokenAmount}
+                    onChange={(e) => setTokenAmount(e.target.value)}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             <div className={styles.buttonContainer}>
-              {selectedTokenType === "legacy" ? (
-                <LegacySplMinter
-                  {...sharedMinterProps}
-                  tokenAmount={Number(tokenAmount)}
-                  tokenDecimals={Number(tokenDecimals)}
-                />
-              ) : (
-                <NftMinter
-                  {...sharedMinterProps}
-                  tokenName={tokenName}
-                  tokenSymbol={tokenSymbol}
-                  tokenUri={tokenUri}
-                />
-              )}
+              <AnimatePresence mode="wait">
+                {selectedTokenType === "legacy" ? (
+                  <motion.div
+                    key="legacy-minter"
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    transition={{ duration: 0.2 }}
+                    className={styles.minterContainer}
+                  >
+                    <LegacySplMinter
+                      {...sharedMinterProps}
+                      tokenAmount={Number(tokenAmount)}
+                      tokenDecimals={Number(tokenDecimals)}
+                    />
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="nft-minter"
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    transition={{ duration: 0.2 }}
+                    className={styles.minterContainer}
+                  >
+                    <NftMinter
+                      {...sharedMinterProps}
+                      tokenName={tokenName}
+                      tokenSymbol={tokenSymbol}
+                      tokenUri={tokenUri}
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </div>
         </div>

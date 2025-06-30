@@ -26,11 +26,12 @@ import {
   createUpdateFieldInstruction,
   pack,
 } from "@solana/spl-token-metadata";
+import { WalletContextState } from "@solana/wallet-adapter-react";
 
 type MinterProps = {
   connection: Connection;
   publicKey: PublicKey | null;
-  sendTransaction: any;
+  sendTransaction: WalletContextState['sendTransaction'];
   tokenName: string;
   tokenSymbol: string;
   tokenUri: string;

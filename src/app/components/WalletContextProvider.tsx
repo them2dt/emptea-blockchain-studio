@@ -21,7 +21,7 @@ export function WalletContextProvider({
     () => [
       new PhantomWalletAdapter(),
     ],
-    [network]
+    []
   );
 
   return (

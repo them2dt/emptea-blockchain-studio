@@ -3,7 +3,7 @@
 import { useCallback } from "react";
 import toast from "react-hot-toast";
 import styles from "../styles/Page.module.css";
-import { Connection, Keypair, PublicKey, SendTransactionError, SystemProgram, Transaction, TransactionInstruction } from "@solana/web3.js";
+import { Connection, Keypair, PublicKey, SystemProgram, Transaction, TransactionInstruction } from "@solana/web3.js";
 import {
   createAssociatedTokenAccountInstruction,
   getAssociatedTokenAddress,
@@ -15,15 +15,15 @@ import {
 } from "@solana/spl-token";
 import { createUmi } from '@metaplex-foundation/umi-bundle-defaults';
 import { mplTokenMetadata, createMetadataAccountV3 } from '@metaplex-foundation/mpl-token-metadata';
-import { fromWeb3JsKeypair, fromWeb3JsPublicKey } from '@metaplex-foundation/umi-web3js-adapters';
+import { fromWeb3JsPublicKey } from '@metaplex-foundation/umi-web3js-adapters';
 import { walletAdapterIdentity } from "@metaplex-foundation/umi-signer-wallet-adapters";
-import { useWallet } from "@solana/wallet-adapter-react";
+import { useWallet, WalletContextState } from "@solana/wallet-adapter-react";
 import { some } from "@metaplex-foundation/umi";
 
 type NftMinterProps = {
   connection: Connection;
   publicKey: PublicKey | null;
-  sendTransaction: any;
+  sendTransaction: WalletContextState['sendTransaction'];
   tokenName: string;
   tokenSymbol: string;
   tokenUri: string;

@@ -5,8 +5,6 @@ import {
   createInitializeMintInstruction,
   createMintToInstruction,
   getAssociatedTokenAddress,
-  getMinimumBalanceForRentExemptMint,
-  MINT_SIZE,
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
 import {
@@ -21,11 +19,12 @@ import {
 import { useCallback } from "react";
 import toast from "react-hot-toast";
 import styles from "../styles/Page.module.css";
+import { WalletContextState } from "@solana/wallet-adapter-react";
 
 type MinterProps = {
   connection: Connection;
   publicKey: PublicKey | null;
-  sendTransaction: any;
+  sendTransaction: WalletContextState['sendTransaction'];
   tokenDecimals: number;
   tokenAmount: number;
   onStateChange: (status: string, signature?: string) => void;
